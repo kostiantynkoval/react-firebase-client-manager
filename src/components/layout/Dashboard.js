@@ -3,7 +3,7 @@ import Clients from '../clients/Clients'
 import Sidebar from './Sidebar'
 
 
-export default () => (
+const Dashboard = () => (
     <div className="row">
         <div className="col-md-10">
             <Clients/>
@@ -13,3 +13,5 @@ export default () => (
         </div>
     </div>
 )
+
+export default Dashboard

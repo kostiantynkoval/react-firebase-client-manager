@@ -9,12 +9,40 @@ import Loading from '../layout/Loading'
 
 class EditClient extends Component {
 
-    state = {
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        balance: ''
+    constructor(props) {
+        super(props);
+        this.firstNameInput = React.createRef();
+        this.lastNameInput = React.createRef();
+        this.emailInput = React.createRef();
+        this.phoneInput = React.createRef();
+        this.balanceInput = React.createRef();
+    }
+
+    onChange = e => {
+        this.setState({
+            [e.target.name]: e.target.value
+        })
+    }
+
+    onSubmit = (e) => {
+        e.preventDefault()
+        const { client, firestore, history } = this.props
+        const updatedClient = {
+            firstName: this.firstNameInput.current.value,
+            lastName: this.lastNameInput.current.value,
+            email: this.emailInput.current.value,
+            phone: this.phoneInput.current.value,
+            balance: this.balanceInput.current.value === '' ? 0 : this.balanceInput.current.value
+        }
+
+        console.log('updatedClient', updatedClient);
+
+        // Update client in firestore
+        firestore
+            .update({ collection: 'clients', doc: client.id }, updatedClient)
+            .then((res) => history.push('/'))
+            .catch(err => console.log('err', err))
+
     }
 
     render() {
@@ -23,7 +51,7 @@ class EditClient extends Component {
 
         if(client) {
             return (
-                <div>
+                <Fragment>
                     <div className="row">
                         <div className="col-md-6">
                             <Link to="/" className="btn btn-link">
@@ -33,7 +61,7 @@ class EditClient extends Component {
                         </div>
                     </div>
                     <div className="card">
-                        <div className="card-header">Add Client</div>
+                        <div className="card-header">Edit Client</div>
                         <div className="card-block">
                             <form onSubmit={this.onSubmit}>
                                 <div className="form-group">
@@ -44,8 +72,8 @@ class EditClient extends Component {
                                         name="firstName"
                                         minLength={2}
                                         required
-                                        onChange={this.onChange}
-                                        value={this.state.firstName}
+                                        ref={this.firstNameInput}
+                                        defaultValue={client.firstName}
                                     />
                                 </div>
                                 <div className="form-group">
@@ -56,8 +84,8 @@ class EditClient extends Component {
                                         name="lastName"
                                         minLength={2}
                                         required
-                                        onChange={this.onChange}
-                                        value={this.state.lastName}
+                                        ref={this.lastNameInput}
+                                        defaultValue={client.lastName}
                                     />
                                 </div>
                                 <div className="form-group">
@@ -67,8 +95,8 @@ class EditClient extends Component {
                                         className="form-control"
                                         name="email"
                                         minLength={2}
-                                        onChange={this.onChange}
-                                        value={this.state.email}
+                                        ref={this.emailInput}
+                                        defaultValue={client.email}
                                     />
                                 </div>
                                 <div className="form-group">
@@ -79,8 +107,8 @@ class EditClient extends Component {
                                         name="phone"
                                         minLength={10}
                                         required
-                                        onChange={this.onChange}
-                                        value={this.state.phone}
+                                        ref={this.phoneInput}
+                                        defaultValue={client.phone}
                                     />
                                 </div>
                                 <div className="form-group">
@@ -89,8 +117,8 @@ class EditClient extends Component {
                                         type="text"
                                         className="form-control"
                                         name="balance"
-                                        onChange={this.onChange}
-                                        value={this.state.balance}
+                                        ref={this.balanceInput}
+                                        defaultValue={client.balance}
                                     />
                                 </div>
 
@@ -98,7 +126,7 @@ class EditClient extends Component {
                             </form>
                         </div>
                     </div>
-                </div>
+                </Fragment>
             )
         } else {
             return <Loading/>
@@ -107,8 +135,8 @@ class EditClient extends Component {
 }
 
 EditClient.propTypes = {
-    clients: PropTypes.array,
-    firestore: PropTypes.object.isRequired
+    firestore: PropTypes.object.isRequired,
+    client: PropTypes.object
 };
 
 export default compose(
