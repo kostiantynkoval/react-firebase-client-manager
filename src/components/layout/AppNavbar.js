@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom'
+import { Link, withRouter } from 'react-router-dom'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { firebaseConnect } from 'react-redux-firebase'
@@ -11,7 +11,7 @@ class AppNavbar extends Component {
         isAuthenticated: false
     }
 
-    static getDerivedStateFromProps(props, state) {
+    static getDerivedStateFromProps(props) {
         const { auth } = props
 
         if (auth.uid) {
@@ -21,13 +21,13 @@ class AppNavbar extends Component {
         }
     }
 
-    onLogoutClick = e => {
+    onLogoutClick = () => {
         const { firebase } = this.props
         firebase.logout()
     }
 
     render() {
-        const { auth } = this.props
+        const { auth, location: { pathname }, settings: { allowRegistration } } = this.props
         const { isAuthenticated } = this.state
         return (
             <nav className="navbar navbar-toggleable-md navbar-inverse bg-primary mb-4">
@@ -63,10 +63,36 @@ class AppNavbar extends Component {
                                         </div>
                                     </li>
                                     <li className="nav-item">
+                                        <Link to="/settings" className="nav-link">
+                                            Settings
+                                        </Link>
+                                    </li>
+                                    <li className="nav-item">
                                         <button onClick={this.onLogoutClick} style={{cursor: 'pointer'}} className="btn btn-secondary">
                                             Logout
                                         </button>
                                     </li>
+                                </ul>
+                            )
+                        }
+
+                        {
+                            allowRegistration && !isAuthenticated && (
+                                <ul className="navbar-nav ml-auto">
+                                    {
+                                        pathname === '/register' && (
+                                            <li className="nav-item">
+                                                <Link className="nav-link" to="/login">Login</Link>
+                                            </li>
+                                        )
+                                    }
+                                    {
+                                        pathname === '/login' && (
+                                            <li className="nav-item">
+                                                <Link className="nav-link" to="/register">Register</Link>
+                                            </li>
+                                        )
+                                    }
                                 </ul>
                             )
                         }
@@ -79,12 +105,16 @@ class AppNavbar extends Component {
 
 AppNavbar.propTypes = {
     firebase: PropTypes.object.isRequired,
-    auth: PropTypes.object.isRequired
+    auth: PropTypes.object.isRequired,
+    settings: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired,
 };
 
 export default compose(
+    withRouter,
     firebaseConnect(),
     connect((state, props) => ({
-        auth: state.firebase.auth
+        auth: state.firebase.auth,
+        settings: state.settings
     }))
 )(AppNavbar);
